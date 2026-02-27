@@ -101,9 +101,14 @@ function renderSingleResult(container, result) {
   // Confidence as a percentage string
   const confPct = { high: "90%+", medium: "~70%", low: "~50%", none: "—" }[conf] ?? "—";
 
+  // Platform pill — shown prominently when a platform is detected
+  const platformPill = (result.bucket === "platform-assisted" && result.platform)
+    ? `<span class="platform-pill">${esc(result.platform)}</span>`
+    : "";
+
   let subLine = "";
   if (result.bucket === "platform-assisted" && result.platform) {
-    subLine = `Platform: <strong>${esc(result.platform)}</strong> &nbsp;·&nbsp; Platform score: ${result.platformScore.toFixed(0)}`;
+    subLine = `Platform score: ${result.platformScore.toFixed(0)}`;
   } else if (result.bucket === "ai-assisted") {
     subLine = `AI heuristic score: ${result.aiScore.toFixed(0)}`;
   }
@@ -112,6 +117,7 @@ function renderSingleResult(container, result) {
     <div class="bucket-label ${cfg.cls}">
       <span class="bucket-icon">${cfg.icon}</span>
       <span>${cfg.label}</span>
+      ${platformPill}
       <span class="badge badge-${conf}">${conf !== "none" ? conf + " · " + confPct : "n/a"}</span>
     </div>
     <p class="result-sub">${cfg.description}</p>

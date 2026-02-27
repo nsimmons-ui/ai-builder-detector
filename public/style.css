@@ -229,6 +229,21 @@ button[type="submit"]:disabled,
 .bucket-no-ai-signals     { color: var(--muted); }
 .bucket-unknown           { color: var(--muted); }
 
+/* Platform name pill — shown inline next to bucket label */
+.platform-pill {
+  display: inline-block;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .2rem .65rem;
+  border-radius: 99px;
+  background: rgba(167,139,250,.18);
+  color: #c4b5fd;
+  border: 1px solid rgba(167,139,250,.35);
+  vertical-align: middle;
+}
+
 .result-sub {
   margin-top: .3rem;
   font-size: .82rem;

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Builder Detector</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+
+    <header>
+      <h1>AI Builder Detector</h1>
+      <p class="subtitle">Find out which AI or no-code tool built a website.</p>
+    </header>
+
+    <!-- Tab switcher -->
+    <div class="tabs" role="tablist">
+      <button class="tab active" role="tab" aria-selected="true"  data-tab="single">Single URL</button>
+      <button class="tab"        role="tab" aria-selected="false" data-tab="batch">CSV Upload</button>
+    </div>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Tab: Single URL                                                      -->
+    <!-- ------------------------------------------------------------------ -->
+    <section id="tab-single" class="tab-panel active" role="tabpanel">
+      <form id="form-single" autocomplete="off">
+        <div class="input-row">
+          <input
+            id="url-input"
+            type="url"
+            placeholder="https://example.com"
+            required
+            spellcheck="false"
+          />
+          <button type="submit" id="btn-check">Check</button>
+        </div>
+      </form>
+
+      <div id="single-result" class="result-card hidden" aria-live="polite"></div>
+    </section>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Tab: CSV Batch                                                       -->
+    <!-- ------------------------------------------------------------------ -->
+    <section id="tab-batch" class="tab-panel" role="tabpanel" aria-hidden="true">
+
+      <div class="upload-zone" id="upload-zone" tabindex="0" role="button" aria-label="Upload CSV file">
+        <input type="file" id="file-input" accept=".csv,text/csv" class="sr-only" />
+        <div class="upload-icon">⬆</div>
+        <p class="upload-label">Drop a CSV here or <span class="link">click to browse</span></p>
+        <p class="upload-hint">Needs a column named <code>url</code>, <code>website</code>, <code>domain</code>, or similar.</p>
+      </div>
+
+      <div id="file-meta" class="file-meta hidden">
+        <span id="file-name"></span>
+        <span id="file-rows"></span>
+        <button id="btn-clear-file" class="btn-ghost" title="Remove file">✕</button>
+      </div>
+
+      <div class="batch-options">
+        <label for="url-col-input">URL column name <span class="muted">(leave blank to auto-detect)</span></label>
+        <input id="url-col-input" type="text" placeholder="e.g. website" />
+      </div>
+
+      <button id="btn-batch" class="btn-primary" disabled>Run Detection</button>
+
+      <div id="batch-progress" class="progress-area hidden" aria-live="polite">
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <p id="progress-label" class="progress-label"></p>
+      </div>
+
+      <div id="batch-result" class="batch-result hidden"></div>
+    </section>
+
+    <footer>
+      <p>Detects: Framer · Webflow · Wix · Squarespace · Lovable · Bolt · v0 · GitHub Pages · Cursor AI</p>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

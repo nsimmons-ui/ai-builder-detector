@@ -297,6 +297,36 @@ const FINGERPRINTS: Record<string, PlatformFingerprint> = {
     ],
   },
 
+  Shopify: {
+    hostname: [
+      ["\\.myshopify\\.com$", "high", "Shopify subdomain (.myshopify.com)"],
+    ],
+    meta_tag: [
+      ["<meta[^>]+name=[\"']shopify-checkout-api-token[\"']", "high", "Shopify checkout API token meta tag"],
+      ["<meta[^>]+name=[\"']shopify-digital-wallet[\"']", "high", "Shopify digital wallet meta tag"],
+    ],
+    js_global: [
+      ["Shopify\\.theme", "high", "Shopify.theme JS global"],
+      ["Shopify\\.shop", "high", "Shopify.shop JS global"],
+      ["Shopify\\.locale", "high", "Shopify.locale JS global"],
+      ["ShopifyAnalytics", "high", "ShopifyAnalytics JS global"],
+      ["window\\.Shopify", "high", "window.Shopify JS global"],
+      ["Shopify\\.currency", "high", "Shopify.currency JS global"],
+    ],
+    script_src: [
+      ["cdn\\.shopify\\.com", "high", "Shopify CDN script"],
+      ["shopify\\.com/s/files", "high", "Shopify files CDN script"],
+    ],
+    link_href: [
+      ["cdn\\.shopify\\.com", "high", "Shopify CDN stylesheet"],
+      ["shopify\\.com/s/files", "high", "Shopify files CDN stylesheet"],
+    ],
+    img_src: [
+      ["cdn\\.shopify\\.com", "high", "Shopify CDN image"],
+      ["shopify\\.com/s/files", "high", "Shopify files CDN image"],
+    ],
+  },
+
   "GitHub Pages": {
     hostname: [
       ["\\.github\\.io$", "high", "GitHub Pages subdomain (.github.io)"],
@@ -536,6 +566,29 @@ function detectPlatform(
   if (platform === "Bolt") {
     const sv = headers["server-version"] ?? "";
     if (sv) signals.push({ category: "http_header", confidence: "high", description: `Bolt server-version header [${sv.slice(0, 60)}]`, matchedValue: sv.slice(0, 60) });
+  }
+
+  if (platform === "Shopify") {
+    // powered-by: Shopify — present even on headless stores
+    const poweredBy = headers["powered-by"] ?? headers["x-powered-by"] ?? "";
+    if (/shopify/i.test(poweredBy)) {
+      signals.push({ category: "http_header", confidence: "high", description: "Powered-By: Shopify header", matchedValue: poweredBy.slice(0, 60) });
+    }
+    // x-shopid — unique shop ID header leaked by Shopify infrastructure
+    const shopId = headers["x-shopid"] ?? "";
+    if (shopId) {
+      signals.push({ category: "http_header", confidence: "high", description: "x-shopid header (Shopify shop ID)", matchedValue: shopId.slice(0, 60) });
+    }
+    // shopify-complexity-score — Shopify rate-limiting header
+    const complexity = headers["shopify-complexity-score"] ?? "";
+    if (complexity !== "") {
+      signals.push({ category: "http_header", confidence: "high", description: "shopify-complexity-score header", matchedValue: complexity.slice(0, 30) });
+    }
+    // _shopify_essential cookie in set-cookie header
+    const cookie = headers["set-cookie"] ?? "";
+    if (/_shopify_/i.test(cookie)) {
+      signals.push({ category: "http_header", confidence: "high", description: "_shopify_* cookie set by Shopify infrastructure", matchedValue: "_shopify_*" });
+    }
   }
 
   const htmlCategories: Array<keyof PlatformFingerprint> = [

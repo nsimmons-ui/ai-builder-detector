@@ -10,8 +10,15 @@
   <div class="page">
 
     <header>
-      <h1>AI Builder Detector</h1>
-      <p class="subtitle">Find out which AI or no-code tool built a website.</p>
+      <div class="header-row">
+        <div>
+          <h1>AI Builder Detector</h1>
+          <p class="subtitle">Find out which AI or no-code tool built a website.</p>
+        </div>
+        <button class="info-btn" id="btn-info" aria-label="How detection works">
+          How it works
+        </button>
+      </div>
     </header>
 
     <!-- Tab switcher -->
@@ -79,6 +86,246 @@
       <p>Detects: Framer · Webflow · Wix · Squarespace · Shopify · Lovable · Bolt · v0 · GitHub Pages · Cursor AI</p>
     </footer>
 
+  </div>
+
+  <!-- ------------------------------------------------------------------ -->
+  <!-- How it works modal                                                   -->
+  <!-- ------------------------------------------------------------------ -->
+  <div id="info-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">How Detection Works</h2>
+        <button class="modal-close" id="btn-modal-close" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <p class="modal-intro">
+          Every URL is scored across two layers. <strong>Platform detection</strong> runs first and takes priority.
+          If no platform is found, <strong>AI heuristics</strong> look for code patterns left by AI coding assistants.
+        </p>
+
+        <!-- Scoring explainer -->
+        <div class="info-section">
+          <h3>Scoring</h3>
+          <p>Signals are weighted by confidence and grouped by category (each category capped at 15 pts):</p>
+          <div class="score-pills">
+            <span class="score-pill high">HIGH = 10 pts</span>
+            <span class="score-pill medium">MEDIUM = 5 pts</span>
+            <span class="score-pill low">LOW = 2 pts</span>
+          </div>
+          <p style="margin-top:.6rem">Platform threshold: <strong>≥ 5 pts</strong> &nbsp;·&nbsp; AI heuristic threshold: <strong>≥ 10 pts</strong></p>
+        </div>
+
+        <!-- Buckets -->
+        <div class="info-section">
+          <h3>Output Buckets</h3>
+          <div class="bucket-rows">
+            <div class="bucket-row"><span class="bucket-dot platform-assisted"></span><strong>Platform-assisted</strong> — built with a no-code or AI site builder (Framer, Wix, Shopify, etc.)</div>
+            <div class="bucket-row"><span class="bucket-dot ai-assisted"></span><strong>AI-assisted</strong> — code patterns consistent with an AI coding assistant (Claude, Cursor, Copilot, etc.)</div>
+            <div class="bucket-row"><span class="bucket-dot no-signals"></span><strong>No AI signals</strong> — no identifiable signals found; likely hand-written</div>
+            <div class="bucket-row"><span class="bucket-dot unknown"></span><strong>Unknown</strong> — could not fetch or analyse the page</div>
+          </div>
+        </div>
+
+        <!-- Platform signals -->
+        <div class="info-section">
+          <h3>Platform Signals</h3>
+          <div class="platform-grid">
+
+            <div class="platform-card">
+              <div class="platform-name">Framer</div>
+              <ul>
+                <li>Subdomain <code>.framer.website / .app / .ai</code></li>
+                <li>Server header starting with <code>Framer/</code></li>
+                <li>Generator meta tag</li>
+                <li>Data attributes <code>data-framer-*</code></li>
+                <li>CSS variables <code>--framer-font-family</code> etc.</li>
+                <li>CDN <code>framerusercontent.com</code></li>
+              </ul>
+            </div>
+
+            <div class="platform-card">
+              <div class="platform-name">Webflow</div>
+              <ul>
+                <li>Subdomain <code>.webflow.io</code></li>
+                <li>Generator meta tag</li>
+                <li>HTML comment "This site was created in Webflow"</li>
+                <li>Data attributes <code>data-wf-*</code></li>
+                <li>CSS classes <code>w-nav</code>, <code>w-container</code>, <code>w-row</code></li>
+                <li>JS globals <code>window.Webflow</code></li>
+                <li>CDN <code>assets.website-files.com</code></li>
+              </ul>
+            </div>
+
+            <div class="platform-card">
+              <div class="platform-name">Wix</div>
+              <ul>
+                <li>Subdomain <code>.wix.com</code></li>
+                <li>Server header: Pepyaka</li>
+                <li>Header <code>x-meta-site-is-wix-site: 1</code></li>
+                <li>Generator meta tag</li>
+                <li>CSS variables <code>--color_0</code>, <code>--wix-ads-height</code></li>
+                <li>DOM IDs <code>SITE_CONTAINER</code>, <code>masterPage</code></li>
+                <li>CDN <code>static.parastorage.com</code></li>
+              </ul>
+            </div>
+
+            <div class="platform-card">
+              <div class="platform-name">Squarespace</div>
+              <ul>
+                <li>Subdomain <code>.squarespace.com</code></li>
+                <li>Server header containing "Squarespace"</li>
+                <li>Generator meta tag</li>
+                <li>JS globals <code>SQUARESPACE_ROLLUPS</code>, <code>Y.Squarespace</code></li>
+                <li>CSS classes <code>sqs-block</code>, <code>sqs-layout</code></li>
+                <li>CDN <code>static*.squarespace.com</code></li>
+              </ul>
+            </div>
+
+            <div class="platform-card">
+              <div class="platform-name">Shopify</div>
+              <ul>
+                <li>Subdomain <code>.myshopify.com</code></li>
+                <li>Header <code>powered-by: Shopify</code> <em>(survives headless)</em></li>
+                <li>Header <code>x-shopid</code> <em>(survives headless)</em></li>
+                <li>Header <code>shopify-complexity-score</code></li>
+                <li>Cookie <code>_shopify_*</code> <em>(survives headless)</em></li>
+                <li>JS globals <code>window.Shopify</code>, <code>ShopifyAnalytics</code></li>
+                <li>CDN <code>cdn.shopify.com</code></li>
+              </ul>
+            </div>
+
+            <div class="platform-card">
+              <div class="platform-name">Lovable</div>
+              <ul>
+                <li>Subdomain <code>.lovable.app</code></li>
+                <li>Generator meta tag</li>
+                <li>JS globals <code>window.__lovable*</code></li>
+                <li>Asset paths <code>/lovable-uploads/[UUID]</code></li>
+              </ul>
+            </div>
+
+            <div class="platform-card">
+              <div class="platform-name">Bolt</div>
+              <ul>
+                <li>Subdomain <code>.bolt.new</code>, <code>.stackblitz.io</code></li>
+                <li>Server header containing "bolt"</li>
+                <li>Header <code>server-version</code></li>
+                <li>Generator meta tag</li>
+                <li>JS globals <code>window.__bolt*</code></li>
+              </ul>
+            </div>
+
+            <div class="platform-card">
+              <div class="platform-name">v0 (Vercel)</div>
+              <ul>
+                <li>Subdomain <code>.v0.dev</code></li>
+                <li>Generator meta tag</li>
+                <li>JS globals <code>window.__v0*</code></li>
+              </ul>
+            </div>
+
+            <div class="platform-card">
+              <div class="platform-name">GitHub Pages</div>
+              <ul>
+                <li>Subdomain <code>.github.io</code></li>
+                <li>Server header <code>GitHub.com</code></li>
+                <li>HTML comment mentioning "Copilot Workspace" (low)</li>
+              </ul>
+            </div>
+
+            <div class="platform-card">
+              <div class="platform-name">Cursor AI</div>
+              <ul>
+                <li>HTML comment mentioning "Cursor AI" (low)</li>
+                <li>Meta tag with content "Cursor AI" (low)</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- AI heuristics -->
+        <div class="info-section">
+          <h3>AI Heuristic Signals</h3>
+          <p style="margin-bottom:.8rem">These fire only when no platform is detected. Score ≥ 10 triggers <strong>AI-assisted</strong>.</p>
+          <table class="heuristic-table">
+            <thead>
+              <tr><th>Signal</th><th>Conf.</th><th>Pts</th><th>How detected</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>shadcn/ui patterns</td>
+                <td><span class="signal-conf high">HIGH</span></td>
+                <td>10</td>
+                <td>Specific class combos from shadcn components (Card, Button, Badge, Dialog), <code>@radix-ui/</code> imports, <code>cn()</code>/<code>twMerge</code></td>
+              </tr>
+              <tr>
+                <td>Inter font</td>
+                <td><span class="signal-conf high">HIGH</span></td>
+                <td>10</td>
+                <td><code>fonts.googleapis.com/css.*Inter</code> or <code>font-family:.*Inter</code></td>
+              </tr>
+              <tr>
+                <td>Tailwind stack</td>
+                <td><span class="signal-conf medium">MED</span></td>
+                <td>5</td>
+                <td>≥2 of: verbose flex/grid combos, <code>sm:/dark:</code> prefix stacking, color scale shades (slate-500 etc.)</td>
+              </tr>
+              <tr>
+                <td>Vite + React SPA</td>
+                <td><span class="signal-conf medium">MED</span></td>
+                <td>5</td>
+                <td><code>/assets/index-[hash].js</code> (Vite output) + empty <code>&lt;div id="root"&gt;</code></td>
+              </tr>
+              <tr>
+                <td>Lucide icons</td>
+                <td><span class="signal-conf medium">MED</span></td>
+                <td>5</td>
+                <td><code>lucide-react</code> in script src or <code>lucide</code> reference in HTML/JS</td>
+              </tr>
+              <tr>
+                <td>Vercel / Netlify hosting</td>
+                <td><span class="signal-conf medium">MED</span></td>
+                <td>5</td>
+                <td>Response headers <code>x-vercel-id</code> or <code>x-nf-request-id</code></td>
+              </tr>
+              <tr>
+                <td>AI generator meta tag</td>
+                <td><span class="signal-conf high">HIGH</span></td>
+                <td>10</td>
+                <td><code>&lt;meta name="generator"&gt;</code> containing v0, bolt, lovable, cursor, copilot, claude, chatgpt, gpt</td>
+              </tr>
+              <tr>
+                <td>Prototype hosting</td>
+                <td><span class="signal-conf low">LOW</span></td>
+                <td>2</td>
+                <td>Subdomain on <code>vercel.app</code>, <code>netlify.app</code>, <code>pages.dev</code>, <code>railway.app</code>, <code>render.com</code>, <code>fly.dev</code></td>
+              </tr>
+              <tr>
+                <td>Over-commenter comments</td>
+                <td><span class="signal-conf low">LOW</span></td>
+                <td>2</td>
+                <td>Tutorial-style comments explaining obvious code ("This function", "Here we", "Hero section", etc.)</td>
+              </tr>
+              <tr>
+                <td>Generic numbered naming</td>
+                <td><span class="signal-conf medium">MED</span></td>
+                <td>5</td>
+                <td>≥5 occurrences of <code>.container-1</code>, <code>.wrapper-2</code>, <code>.section-3</code> style names</td>
+              </tr>
+              <tr>
+                <td>Placeholder / hallucinated links</td>
+                <td><span class="signal-conf low">LOW</span></td>
+                <td>2</td>
+                <td><code>href="#"</code>, <code>href="https://example.com"</code>, <code>/placeholder</code>, lorem ipsum in links</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>

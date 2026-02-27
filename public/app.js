@@ -2,6 +2,38 @@
 /* AI Builder Detector — Frontend                                       */
 /* ------------------------------------------------------------------ */
 
+// ---------------------------------------------------------------------------
+// "How it works" modal
+// ---------------------------------------------------------------------------
+
+const infoModal    = document.getElementById("info-modal");
+const btnInfo      = document.getElementById("btn-info");
+const btnModalClose = document.getElementById("btn-modal-close");
+
+btnInfo.addEventListener("click", () => {
+  infoModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+  btnModalClose.focus();
+});
+
+function closeModal() {
+  infoModal.classList.add("hidden");
+  document.body.style.overflow = "";
+  btnInfo.focus();
+}
+
+btnModalClose.addEventListener("click", closeModal);
+
+// Close on backdrop click (outside modal box)
+infoModal.addEventListener("click", (e) => {
+  if (e.target === infoModal) closeModal();
+});
+
+// Close on Escape
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !infoModal.classList.contains("hidden")) closeModal();
+});
+
 const BATCH_CHUNK_SIZE = 50;
 
 // ---------------------------------------------------------------------------

@@ -138,12 +138,13 @@ function renderSingleResult(container, result) {
     ? `<span class="platform-pill">${esc(result.platform)}</span>`
     : "";
 
-  let subLine = "";
-  if (result.bucket === "platform-assisted" && result.platform) {
-    subLine = `Platform score: ${result.platformScore.toFixed(0)}`;
-  } else if (result.bucket === "ai-assisted") {
-    subLine = `AI heuristic score: ${result.aiScore.toFixed(0)}`;
-  }
+  const score = result.bucket === "platform-assisted"
+    ? result.platformScore
+    : result.aiScore;
+  const scoreLabel = result.bucket === "platform-assisted" ? "platform" : "ai";
+  const scorePill = (score > 0)
+    ? `<span class="score-inline">${score.toFixed(0)} pts</span>`
+    : "";
 
   container.innerHTML = `
     <div class="bucket-label ${cfg.cls}">
@@ -151,9 +152,9 @@ function renderSingleResult(container, result) {
       <span>${cfg.label}</span>
       ${platformPill}
       <span class="badge badge-${conf}">${conf !== "none" ? conf + " · " + confPct : "n/a"}</span>
+      ${scorePill}
     </div>
     <p class="result-sub">${cfg.description}</p>
-    ${subLine ? `<p class="result-sub" style="margin-top:.5rem">${subLine}</p>` : ""}
     <p class="result-sub">${esc(result.finalUrl || result.url)}</p>
     ${renderSignalSections(result)}
   `;
@@ -382,13 +383,16 @@ function renderBatchResults(rows, originalHeaders) {
             <th>URL</th>
             <th>Bucket</th>
             <th>Confidence</th>
+            <th>Score</th>
             <th>Platform</th>
-            <th>AI score</th>
           </tr>
         </thead>
         <tbody>
           ${rows.map((r) => {
             const cfg = BUCKET_CONFIG[r.ai_bucket] ?? BUCKET_CONFIG["unknown"];
+            const score = r.ai_bucket === "platform-assisted"
+              ? (r.ai_platform_score || "—")
+              : (r.ai_score || "—");
             return `
               <tr>
                 <td class="td-url" title="${esc(r[urlCol] ?? "")}">${esc(truncate(r[urlCol] ?? "", 40))}</td>
@@ -397,8 +401,8 @@ function renderBatchResults(rows, originalHeaders) {
                   ? `<span class="badge badge-${esc(r.ai_bucket_confidence)}">${esc(r.ai_bucket_confidence)}</span>`
                   : `<span style="color:var(--muted)">—</span>`}
                 </td>
+                <td style="font-family:var(--mono);font-size:.75rem">${esc(String(score))}</td>
                 <td>${r.ai_platform || `<span style="color:var(--muted)">—</span>`}</td>
-                <td>${r.ai_score || "—"}</td>
               </tr>
             `;
           }).join("")}

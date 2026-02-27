@@ -566,6 +566,20 @@ button[type="submit"]:disabled,
 .bucket-no-ai-signals     { color: var(--muted); }
 .bucket-unknown           { color: var(--muted); }
 
+/* Score inline — shown next to confidence badge */
+.score-inline {
+  display: inline-block;
+  font-size: .72rem;
+  font-weight: 700;
+  font-family: var(--mono);
+  padding: .2rem .55rem;
+  border-radius: 99px;
+  background: rgba(255,255,255,.06);
+  color: var(--muted);
+  border: 1px solid var(--border-hi);
+  vertical-align: middle;
+}
+
 /* Platform name pill — shown inline next to bucket label */
 .platform-pill {
   display: inline-block;

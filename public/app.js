@@ -167,14 +167,19 @@ function renderSignalSections(result) {
   return parts.join("");
 }
 
+const SIGNAL_WEIGHTS = { high: 10, medium: 5, low: 2 };
+
 function renderSignals(signals) {
-  return signals.map((s) => `
+  return signals.map((s) => {
+    const pts = SIGNAL_WEIGHTS[s.confidence] ?? 1;
+    return `
     <div class="signal-row">
       <span class="signal-conf ${s.confidence}">${s.confidence.toUpperCase()}</span>
       <span class="signal-desc">${esc(s.description)}</span>
+      <span class="signal-pts">+${pts} pts</span>
       ${s.matchedValue ? `<span class="signal-match">${esc(s.matchedValue)}</span>` : ""}
     </div>
-  `).join("");
+  `}).join("");
 }
 
 function showLoading(container, msg) {

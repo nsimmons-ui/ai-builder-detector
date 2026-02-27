@@ -107,13 +107,42 @@
         <!-- Scoring explainer -->
         <div class="info-section">
           <h3>Scoring</h3>
-          <p>Signals are weighted by confidence and grouped by category (each category capped at 15 pts):</p>
-          <div class="score-pills">
+          <p>Every signal has a confidence level that maps to a point value. Signals are <strong>grouped by category</strong> — each category is capped at 15 pts to prevent any single signal type from dominating the score. The total is then compared against a threshold to assign a bucket.</p>
+          <div class="score-pills" style="margin-top:.7rem">
             <span class="score-pill high">HIGH = 10 pts</span>
             <span class="score-pill medium">MEDIUM = 5 pts</span>
             <span class="score-pill low">LOW = 2 pts</span>
           </div>
-          <p style="margin-top:.6rem">Platform threshold: <strong>≥ 5 pts</strong> &nbsp;·&nbsp; AI heuristic threshold: <strong>≥ 10 pts</strong></p>
+          <div class="scoring-pipeline">
+            <div class="pipeline-step">
+              <div class="pipeline-label">Fetch signals</div>
+              <div class="pipeline-desc">Platform + AI heuristic signals are collected from HTML, headers, JS, and visible text</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step">
+              <div class="pipeline-label">Score by category</div>
+              <div class="pipeline-desc">Weights summed per category, each capped at 15 pts, then totalled</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step">
+              <div class="pipeline-label">Threshold check</div>
+              <div class="pipeline-desc">Platform ≥ 5 pts wins first. If not, AI score ≥ 10 pts → AI-assisted</div>
+            </div>
+            <div class="pipeline-arrow">→</div>
+            <div class="pipeline-step">
+              <div class="pipeline-label">Confidence label</div>
+              <div class="pipeline-desc">Score vs. threshold ratio: 1× = low, 1.5× = medium, 3× = high</div>
+            </div>
+          </div>
+          <div class="scoring-example">
+            <div class="example-label">Example — AI-assisted site scoring 15 pts (medium confidence):</div>
+            <div class="example-rows">
+              <div class="example-row"><span class="example-cat">buzzword_density</span><span class="example-conf medium">MEDIUM</span><span class="example-pts">+5 pts</span></div>
+              <div class="example-row"><span class="example-cat">tailwind_stack</span><span class="example-conf medium">MEDIUM</span><span class="example-pts">+5 pts</span></div>
+              <div class="example-row"><span class="example-cat">uniform_structure</span><span class="example-conf medium">MEDIUM</span><span class="example-pts">+5 pts</span></div>
+              <div class="example-row example-total"><span class="example-cat">Total</span><span></span><span class="example-pts">15 pts → <strong>ai-assisted · medium</strong></span></div>
+            </div>
+          </div>
         </div>
 
         <!-- Buckets -->

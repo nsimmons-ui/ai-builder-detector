@@ -199,6 +199,107 @@ h1 {
 .score-pill.medium { background: #451a03; color: var(--warn); }
 .score-pill.low    { background: #1e1b4b; color: #818cf8; }
 
+/* Scoring pipeline */
+.scoring-pipeline {
+  display: flex;
+  align-items: flex-start;
+  gap: .4rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.pipeline-step {
+  flex: 1;
+  min-width: 120px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: .6rem .8rem;
+}
+
+.pipeline-label {
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--accent-hi);
+  margin-bottom: .25rem;
+  letter-spacing: .02em;
+}
+
+.pipeline-desc {
+  font-size: .72rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.pipeline-arrow {
+  color: var(--border-hi);
+  font-size: 1rem;
+  align-self: center;
+  flex-shrink: 0;
+  padding-top: .2rem;
+}
+
+/* Scoring example */
+.scoring-example {
+  margin-top: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.example-label {
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--bg);
+  padding: .45rem .8rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.example-rows { padding: .3rem 0; }
+
+.example-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: .5rem;
+  padding: .3rem .8rem;
+  font-size: .75rem;
+  align-items: center;
+}
+
+.example-row + .example-row { border-top: 1px solid var(--border); }
+
+.example-total {
+  background: rgba(124,109,250,.06);
+  border-top: 1px solid var(--border) !important;
+}
+
+.example-cat {
+  font-family: var(--mono);
+  color: var(--muted);
+  font-size: .7rem;
+}
+
+.example-conf {
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  padding: .1rem .4rem;
+  border-radius: 99px;
+}
+.example-conf.high   { background: #14532d; color: var(--success); }
+.example-conf.medium { background: #451a03; color: var(--warn); }
+.example-conf.low    { background: #1e1b4b; color: #818cf8; }
+
+.example-pts {
+  font-size: .75rem;
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: right;
+}
+.example-total .example-pts strong { color: var(--accent-hi); }
+
 /* Bucket rows */
 .bucket-rows { display: flex; flex-direction: column; gap: .55rem; }
 .bucket-row {

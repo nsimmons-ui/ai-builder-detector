@@ -228,6 +228,13 @@ const FINGERPRINTS: Record<string, PlatformFingerprint> = {
       ["--font_\\d+\\s*:", "medium", "Wix numbered font CSS variable"],
       ["--wix-ads-height", "high", "Wix ads height CSS variable"],
     ],
+    data_attribute: [
+      ["data-testid=[\"']comp-[a-zA-Z0-9]+[\"']", "high", "Wix component testid (comp-*)"],
+      ["data-testid=[\"']mesh-container-content[\"']", "high", "Wix mesh container testid"],
+      ["data-testid=[\"']richTextElement[\"']", "high", "Wix rich text element testid"],
+      ["data-testid=[\"']linkElement[\"']", "high", "Wix link element testid"],
+      ["data-mesh-id=", "high", "Wix mesh layout ID attribute"],
+    ],
     script_src: [
       ["static\\.parastorage\\.com", "high", "Wix parastorage CDN"],
       ["static\\.wixstatic\\.com", "high", "Wix static CDN"],
@@ -261,6 +268,50 @@ const FINGERPRINTS: Record<string, PlatformFingerprint> = {
     ],
     img_src: [
       ["/lovable-uploads/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.[a-z]+", "high", "Lovable UUID uploads image"],
+    ],
+  },
+
+  WordPress: {
+    hostname: [
+      ["\\.wordpress\\.com$", "high", "WordPress.com subdomain"],
+    ],
+    http_header: [
+      ["WordPress", "high", "WordPress server header"],
+    ],
+    meta_tag: [
+      ["<meta[^>]+name=[\"']generator[\"'][^>]+content=[\"']WordPress", "high", "WordPress generator meta tag"],
+      ["<meta[^>]+content=[\"']WordPress[^\"']*[\"'][^>]+name=[\"']generator[\"']", "high", "WordPress generator meta tag (reversed)"],
+    ],
+    html_comment: [
+      ["This site is optimized with the Yoast SEO plugin", "high", "Yoast SEO plugin comment (WordPress)"],
+      ["This page is optimized by the WP Super Cache", "high", "WP Super Cache comment (WordPress)"],
+      ["W3 Total Cache", "high", "W3 Total Cache plugin comment (WordPress)"],
+    ],
+    js_global: [
+      ["var wp\\b", "medium", "WordPress wp JS global"],
+      ["window\\.wp\\b", "high", "WordPress window.wp JS global"],
+      ["wp\\.data\\b", "high", "WordPress block editor wp.data"],
+      ["wpApiSettings", "high", "WordPress REST API settings global"],
+      ["wc_cart_fragments_params", "high", "WooCommerce cart fragments (WordPress)"],
+    ],
+    css_class: [
+      ["\\bwp-block-", "high", "WordPress block editor CSS class"],
+      ["\\bwp-content\\b", "high", "WordPress wp-content CSS class reference"],
+      ["\\bwp-singular\\b", "high", "WordPress body class wp-singular"],
+      ["\\bwp-emoji\\b", "medium", "WordPress emoji CSS class"],
+    ],
+    script_src: [
+      ["wp-content/", "high", "WordPress wp-content script path"],
+      ["wp-includes/js/", "high", "WordPress wp-includes JS"],
+      ["wp-emoji-release\\.min\\.js", "high", "WordPress emoji script"],
+    ],
+    link_href: [
+      ["wp-content/themes/", "high", "WordPress theme stylesheet"],
+      ["wp-content/plugins/", "high", "WordPress plugin stylesheet"],
+      ["wp-includes/css/", "high", "WordPress core CSS"],
+    ],
+    img_src: [
+      ["wp-content/uploads/", "high", "WordPress uploads image path"],
     ],
   },
 
@@ -459,6 +510,52 @@ const AI_GENERATOR_META_PATTERNS = [
   /<meta[^>]+name=["']generator["'][^>]+content=["'][^"']*(?:Hostinger\s*AI|AI\s*Website|Durable\.co|10Web|Jimdo\s*AI|GoDaddy\s*AI|Wix\s*ADI|Zyro)[^"']*["']/i,
   /<meta[^>]+content=["'][^"']*(?:Hostinger\s*AI|AI\s*Website|Durable\.co|10Web|Jimdo\s*AI|GoDaddy\s*AI|Wix\s*ADI|Zyro)[^"']*["'][^>]+name=["']generator["']/i,
 ];
+
+// AI marketing buzzwords — high density is a strong "slop" signal
+const AI_BUZZWORDS = [
+  "seamless", "seamlessly",
+  "robust", "robustly",
+  "elevate", "elevating",
+  "revolutionize", "revolutionizing", "revolutionary",
+  "cutting-edge", "cutting edge",
+  "streamline", "streamlined", "streamlining",
+  "empower", "empowering", "empowers",
+  "leverage", "leveraging",
+  "unlock", "unlocking",
+  "scalable", "scalability",
+  "bespoke",
+  "harness", "harnessing",
+  "innovative", "innovation",
+  "transformative", "transform your",
+  "game-changing", "game changer",
+  "state-of-the-art",
+  "next-level", "next level",
+  "best-in-class",
+  "dive in", "dive into",
+  "in today's", "in the modern",
+  "fast-paced world", "digital landscape",
+  "journey", // "begin your journey", "start your journey"
+  "delve into",
+  "at the forefront",
+  "tailor-made", "tailored to",
+  "intuitive", "user-friendly",
+  "unparalleled",
+  "holistic",
+  "synergy", "synergize",
+  "ecosystem",
+  "pain points",
+  "game plan",
+  "move the needle",
+];
+
+// "Too clean" code heuristics — AI produces unusually uniform, comment-free code
+// These check the HTML/JS source for structural uniformity signals.
+
+// Ratio threshold: if className= density is very high, it suggests AI-generated Tailwind
+// (checked dynamically in detectAiHeuristics)
+
+// Repetitive paragraph/list structure — extract visible text and check length variance
+// (checked dynamically in detectAiHeuristics)
 
 // ---------------------------------------------------------------------------
 // Scoring constants
@@ -851,6 +948,111 @@ async function detectAiHeuristics(
         matchedValue: m[0].slice(0, 120),
       });
       break;
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // 12. AI buzzword / "slop" text density
+  // Strip visible text from HTML, count buzzword hits per 1000 words.
+  // A high density is a strong signal that copy was LLM-generated.
+  // ------------------------------------------------------------------
+  const visibleText = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+
+  const wordCount = (visibleText.match(/\b\w+\b/g) ?? []).length;
+  if (wordCount > 50) {
+    let buzzHits = 0;
+    const matchedBuzz: string[] = [];
+    for (const word of AI_BUZZWORDS) {
+      const re = new RegExp(`\\b${word.replace(/-/g, "[-\\s]")}\\b`, "gi");
+      const matches = visibleText.match(re);
+      if (matches) {
+        buzzHits += matches.length;
+        if (!matchedBuzz.includes(word)) matchedBuzz.push(word);
+      }
+    }
+    const buzzPer1k = (buzzHits / wordCount) * 1000;
+    if (buzzPer1k >= 8 || buzzHits >= 10) {
+      signals.push({
+        category: "buzzword_density",
+        confidence: "high",
+        description: `AI marketing copy detected — ${buzzHits} buzzwords in ${wordCount} words (${buzzPer1k.toFixed(1)}/1k)`,
+        matchedValue: matchedBuzz.slice(0, 8).join(", "),
+      });
+    } else if (buzzPer1k >= 4 || buzzHits >= 5) {
+      signals.push({
+        category: "buzzword_density",
+        confidence: "medium",
+        description: `Elevated AI buzzword density — ${buzzHits} hits in ${wordCount} words (${buzzPer1k.toFixed(1)}/1k)`,
+        matchedValue: matchedBuzz.slice(0, 5).join(", "),
+      });
+    } else if (buzzHits >= 2) {
+      signals.push({
+        category: "buzzword_density",
+        confidence: "low",
+        description: `Some AI buzzwords detected — ${buzzHits} hits`,
+        matchedValue: matchedBuzz.slice(0, 3).join(", "),
+      });
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // 13. "Too clean" code — suspiciously zero commented-out code
+  // Real dev codebases almost always have some leftover comments
+  // (// old, /* TODO, <!-- temp). Their absence + other signals is notable.
+  // Only fires as a low-confidence corroborating signal alongside others.
+  // ------------------------------------------------------------------
+  const hasDevComments = /\/\/\s*(old|legacy|temp|todo|fixme|hack|workaround|debug|test|remove|unused|disabled|backup)\b/i.test(fullSource)
+    || /\/\*[\s\S]{0,200}(TODO|FIXME|HACK|XXX|old|legacy|temp)\b/i.test(fullSource)
+    || /<!--\s*(old|temp|todo|remove|disabled|test)\b/i.test(fullSource);
+
+  const classNameCount = (fullSource.match(/className=/g) ?? []).length;
+  const totalLines = fullSource.split("\n").length;
+  const classNameRatio = totalLines > 0 ? classNameCount / totalLines : 0;
+
+  if (!hasDevComments && classNameRatio > 0.15 && classNameCount > 30) {
+    signals.push({
+      category: "clean_code",
+      confidence: "low",
+      description: `No developer comments found + high className density (${classNameCount} className= in ${totalLines} lines) — consistent with AI-generated code`,
+      matchedValue: `classNameRatio: ${classNameRatio.toFixed(2)}`,
+    });
+  }
+
+  // ------------------------------------------------------------------
+  // 14. Repetitive list/paragraph structure
+  // AI tends to generate <li> or <p> items of near-identical length.
+  // Low variance in character length across 5+ items = soft signal.
+  // ------------------------------------------------------------------
+  const listItems = [...html.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)]
+    .map(m => m[1].replace(/<[^>]+>/g, "").trim())
+    .filter(t => t.length > 10);
+
+  if (listItems.length >= 5) {
+    const lengths = listItems.map(t => t.length);
+    const mean = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+    const variance = lengths.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / lengths.length;
+    const cv = mean > 0 ? Math.sqrt(variance) / mean : 1; // coefficient of variation
+
+    if (cv < 0.15 && listItems.length >= 6) {
+      signals.push({
+        category: "uniform_structure",
+        confidence: "medium",
+        description: `Highly uniform list structure — ${listItems.length} <li> items with ${(cv * 100).toFixed(0)}% length variation (AI tends to generate parallel, equal-length copy)`,
+        matchedValue: `cv: ${cv.toFixed(2)}, items: ${listItems.length}`,
+      });
+    } else if (cv < 0.25 && listItems.length >= 8) {
+      signals.push({
+        category: "uniform_structure",
+        confidence: "low",
+        description: `Uniform list item lengths detected — ${listItems.length} items, ${(cv * 100).toFixed(0)}% variation`,
+        matchedValue: `cv: ${cv.toFixed(2)}, items: ${listItems.length}`,
+      });
     }
   }
 

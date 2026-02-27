@@ -83,7 +83,7 @@
     </section>
 
     <footer>
-      <p>Detects: Framer · Webflow · Wix · Squarespace · Shopify · Lovable · Bolt · v0 · GitHub Pages · Cursor AI</p>
+      <p>Detects: Framer · Webflow · WordPress · Wix · Squarespace · Shopify · Lovable · Bolt · v0 · GitHub Pages · Cursor AI</p>
     </footer>
 
   </div>
@@ -167,6 +167,7 @@
                 <li>CSS variables <code>--color_0</code>, <code>--wix-ads-height</code></li>
                 <li>DOM IDs <code>SITE_CONTAINER</code>, <code>masterPage</code></li>
                 <li>CDN <code>static.parastorage.com</code></li>
+                <li>Data attributes <code>data-testid="comp-*"</code>, <code>data-mesh-id</code></li>
               </ul>
             </div>
 
@@ -319,6 +320,24 @@
                 <td><span class="signal-conf low">LOW</span></td>
                 <td>2</td>
                 <td><code>href="#"</code>, <code>href="https://example.com"</code>, <code>/placeholder</code>, lorem ipsum in links</td>
+              </tr>
+              <tr>
+                <td>AI buzzword density</td>
+                <td><span class="signal-conf high">HIGH</span></td>
+                <td>10 / 5 / 2</td>
+                <td>Visible page text stripped of HTML and scanned for LLM marketing words (seamless, robust, elevate, revolutionize, cutting-edge, empower, leverage, etc.) — high density = likely AI-written copy</td>
+              </tr>
+              <tr>
+                <td>"Too clean" code</td>
+                <td><span class="signal-conf low">LOW</span></td>
+                <td>2</td>
+                <td>Zero developer comments (no <code>// old</code>, <code>TODO</code>, <code>FIXME</code>) combined with high <code>className=</code> density (&gt;0.15 ratio) — AI code lacks the messy traces of human development</td>
+              </tr>
+              <tr>
+                <td>Uniform list structure</td>
+                <td><span class="signal-conf medium">MED</span></td>
+                <td>5 / 2</td>
+                <td>5+ <code>&lt;li&gt;</code> items with &lt;15% length variation (coefficient of variation) — AI generates suspiciously parallel, equal-length copy</td>
               </tr>
             </tbody>
           </table>
